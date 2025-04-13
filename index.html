@@ -73,6 +73,72 @@
   </div>
 </main>
 
+  <script>
+    // Def interface for API
+    interface Phonetic {
+      text?: string;
+      audio?: string;
+    }
+
+    interface Definition {
+      definition: string;
+      example?: string;
+      synonyms: string[];
+      antonyms: string[];
+    }
+
+    interface Meanings {
+      partOfSpeech: string;
+      definitions: Definition[];
+    }
+
+    interface DictionaryEntry {
+      word: string;
+      phonetic?: string;
+      phonetics?: Phonetic[];
+      origin?: string;
+      meanings: Meanings[];
+    }
+    // Refs for type casting
+    const searchButton = document.getElementById("searchButton") as HTMLButtonElement | null;
+    const wordInput = document.getElementById("wordInput") as HTMLInputElement | null;
+    const displayResultDiv = document.getElementById("result") as HTMLDivElement | null;
+    const defineForm = document.getElementById("defineform") as HTMLFormElement | null;
+    // Listener
+    if (defineForm && wordInput && displayResultDiv && searchButton) {
+      defineForm.addEventListener("submit", (event) => {
+        event.preventDefault(); // Prevent default form submission
+        const word = wordInput.value.trim();
+        if (word) {
+          getMeaning(word, displayResultDiv);
+        } else {
+          displayResultDiv.textContent = "Please enter a word.";
+        }
+      });
+    } else {
+      console.error("One or more DOM elements (defineForm, wordInput, searchButton, result) not found.");
+    }
+    // Fetch
+    const getMeaning = async (word: string, outputElement: HTMLElement): Promise<void> => {
+      try {
+        const response = await fetch(
+          `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`
+        );
+        if (!response.ok) {
+          throw new Error("Sorry. Word not found");
+        }
+        const data: DictionaryEntry[] = await response.json();
+        displayMeaning(data, outputElement);
+      } catch (error: any) {
+        outputElement.textContent = error.message;
+      } finally {
+        if (wordInput) {
+          wordInput.value = "";
+        }
+      }
+    };
+
+  </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
       
